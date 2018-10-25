@@ -1,5 +1,5 @@
 ## Readme
-This small project demonstrates consuming from [NSQ](https://nsq.io/) to the Hadoop [HDFS](https://hortonworks.com/apache/hdfs/) file system with [Apache Flume](https://flume.apache.org/).
+This small project demonstrates consuming from [nsq](https://nsq.io/) to the Hadoop [HDFS](https://hortonworks.com/apache/hdfs/) file system with [Apache Flume](https://flume.apache.org/).
 
 ## Start
 Start the services from the directory containing `docker-compose.yml`:
@@ -19,7 +19,7 @@ Check logs on nsq-flume to see the message being consumed and saved to HDFS:
 
 View the `test` topic on the NSQ admin console: http://localhost:4171/topics/test
 
-![NSQ Admin Console](nsq.png "NSQ Admin Console")
+![nsq Admin Console](nsq.png "NSQ Admin Console")
 
 To see the saved files, browse to [http://localhost:50070](http://localhost:50070), use Utilities (on the right) to see the files:
 
