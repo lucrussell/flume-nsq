@@ -1,0 +1,142 @@
+version: '3'
+
+services:
+  # NSQ message bus
+  nsq-bus:
+      ports:
+        - "4150:4150"
+        - "4151:4151"
+      hostname: nsq-bus
+      image: nsqio/nsq:latest
+      command: /nsqd --lookupd-tcp-address=nsq-bus-lookup:4160
+      depends_on:
+        - nsq-bus-lookup
+      networks:
+        - backend
+  nsq-bus-admin:
+      ports:
+        - "4171:4171"
+      hostname: nsq-bus-admin
+      image: nsqio/nsq:latest
+      command: /nsqadmin --lookupd-http-address=nsq-bus-lookup:4161
+      depends_on:
+        - nsq-bus-lookup
+      networks:
+        - backend
+  nsq-bus-lookup:
+      ports:
+        - "4160:4160"
+        - "4161:4161"
+      hostname: nsq-bus-lookup
+      image: nsqio/nsq:latest
+      command: /nsqlookupd
+      networks:
+        - backend
+
+  namenode:
+    image: bde2020/hadoop-namenode:1.1.0-hadoop2.7.1-java8
+    volumes:
+      - ./hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    ports:
+    - "50070:50070"
+    - "8020:8020"
+    env_file:
+      - ./hadoop.env
+    networks:
+      - backend
+
+  resourcemanager:
+      image: bde2020/hadoop-resourcemanager:1.1.0-hadoop2.7.1-java8
+      depends_on:
+        - namenode
+        - datanode1
+      ports:
+        - "58088:8088"
+      env_file:
+        - ./hadoop.env
+      networks:
+        - backend
+
+  historyserver:
+      image: bde2020/hadoop-historyserver:1.1.0-hadoop2.7.1-java8
+      depends_on:
+        - namenode
+        - datanode1
+      ports:
+        - "58188:8188"
+      volumes:
+        - ./hadoop_historyserver:/hadoop/yarn/timeline
+      env_file:
+        - ./hadoop.env
+      networks:
+        - backend
+
+  nodemanager1:
+      image: bde2020/hadoop-nodemanager:1.1.0-hadoop2.7.1-java8
+      depends_on:
+        - namenode
+        - datanode1
+      ports:
+        - "58042:8042"
+      env_file:
+        - ./hadoop.env
+      networks:
+        - backend
+
+  datanode1:
+      image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
+      depends_on:
+        - namenode
+      ports:
+        - "50075:50075"
+      volumes:
+        - ./hadoop_datanode1:/hadoop/dfs/data
+      env_file:
+        - ./hadoop.env
+      networks:
+        - backend
+
+  hbase:
+      image: bde2020/hbase-standalone:1.0.0-hbase1.2.6
+      container_name: hbase
+      volumes:
+        - ./hbase_data:/hbase-data
+        - ./hbase_zookeeper_data:/zookeeper-data
+      ports:
+        - 16000:16000
+        - 16010:16010
+        - 16020:16020
+        - 16030:16030
+        - 2888:2888
+        - 3888:3888
+        - 2181:2181
+      environment:
+        SERVICE_PRECONDITION: "namenode:50070 datanode:50075"
+      env_file:
+        - ./hbase-standalone.env
+      networks:
+        - backend
+
+  nsq-flume:
+      # NOTE: assumes nsq-flume has been built from the docker-flume subdirectory
+      build:
+        context: docker-flume
+        #dockerfile: Dockerfile
+      volumes:
+        - ./flume/flume.conf:/opt/flume-config/flume.conf
+        - ./flume/log4j.properties:/opt/flume-config/log4j.properties
+        - ./output:/var/tmp/output
+        - ./flume-log:/var/log/flume-ng
+        - ./flume/start-flume.sh:/opt/flume/bin/start-flume
+      environment:
+        - FLUME_AGENT_NAME=docker
+      ports:
+      - "44444:44444"
+      networks:
+        - backend
+
+
+networks:
+  backend:
