@@ -1,5 +1,5 @@
 ## Readme
-This small project demonstrates consuming from [NSQ](https://nsq.io/) to the Hadoop [HDFS](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html) file system.
+This small project demonstrates consuming from [NSQ](https://nsq.io/) to the Hadoop [HDFS](https://hortonworks.com/apache/hdfs/) file system with [Apache Flume](https://flume.apache.org/).
 
 ## Start
 Start the services from the directory containing `docker-compose.yml`:
