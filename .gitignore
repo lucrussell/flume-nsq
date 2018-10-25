@@ -1,0 +1,7 @@
+/flume-log/**
+/hadoop_datanode1/**
+/hadoop_historyserver/**
+/hadoop_namenode/**
+/hbase_data/**
+/hbase_zookeeper_data/**
+/output
